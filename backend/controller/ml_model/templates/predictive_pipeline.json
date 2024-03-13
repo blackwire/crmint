@@ -138,6 +138,45 @@
             "value": false
           }
         ]
+      {% elif output.destination.is_campaign_manager_conversion %}
+        "worker_class": "{{Worker.BQ_TO_CAMPAIGN_MANAGER_CONVERSION}}",
+        "params": [
+          {
+            "name": "bq_project_id",
+            "type": "{{ParamType.STRING}}",
+            "value": "{{project}}"
+          },
+          {
+            "name": "bq_dataset_id",
+            "type": "{{ParamType.STRING}}",
+            "value": "{{dataset}}"
+          },
+          {
+            "name": "bq_dataset_location",
+            "type": "{{ParamType.STRING}}",
+            "value": "{{location}}"
+          },
+          {
+            "name": "bq_table_id",
+            "type": "{{ParamType.STRING}}",
+            "value": "output"
+          },
+          {
+            "name": "profile_id",
+            "type": "{{ParamType.STRING}}",
+            "value": "{{output.parameters.profile_id}}"
+          },
+          {
+            "name": "template",
+            "type": "{{ParamType.TEXT}}",
+            "value": "{{compile_template(TemplateFile.CAMPAIGN_MANAGER_CONVERSION, Step.UPLOADING)}}"
+          },
+          {
+            "name": "debug",
+            "type": "{{ParamType.BOOLEAN}}",
+            "value": false
+          }
+        ]
       {% endif %}
     }
   ],

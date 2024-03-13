@@ -35,6 +35,7 @@ class TemplateFile(shared.StrEnum):
   MODEL_BQML = 'model_bqml.sql'
   GOOGLE_ANALYTICS_MP_EVENT = 'google_analytics_mp_event.json'
   GOOGLE_ADS_OFFLINE_CONVERSION = 'google_ads_offline_conversion.json'
+  CAMPAIGN_MANAGER_CONVERSION = 'campaign_manager_conversion.json'
   OUTPUT = 'output.sql'
 
 
@@ -65,6 +66,7 @@ class ModelTypes:
 class Destination(shared.StrEnum):
   GOOGLE_ANALYTICS_MP_EVENT = 'GOOGLE_ANALYTICS_MP_EVENT',
   GOOGLE_ADS_OFFLINE_CONVERSION = 'GOOGLE_ADS_OFFLINE_CONVERSION'
+  CAMPAIGN_MANAGER_CONVERSION = 'CAMPAIGN_MANAGER_CONVERSION'
 
 
 class ParamType(shared.StrEnum):
@@ -79,6 +81,7 @@ class Worker(shared.StrEnum):
   BQ_SCRIPT_EXECUTOR = 'BQScriptExecutor'
   BQ_TO_MEASUREMENT_PROTOCOL_GA4 = 'BQToMeasurementProtocolGA4'
   BQ_TO_GOOGLE_ADS_OFFLINE_CONVERSION = 'BQToAdsOfflineClickConversion'
+  BQ_TO_CAMPAIGN_MANAGER_CONVERSION = 'BQToCampaignManagerConversion'
 
 
 class UniqueId(shared.StrEnum):
@@ -299,7 +302,8 @@ class Compiler():
         'output': {
           'destination': {
             'is_google_analytics_mp_event': self.ml_model.output.destination == Destination.GOOGLE_ANALYTICS_MP_EVENT,
-            'is_google_ads_offline_conversion': self.ml_model.output.destination == Destination.GOOGLE_ADS_OFFLINE_CONVERSION
+            'is_google_ads_offline_conversion': self.ml_model.output.destination == Destination.GOOGLE_ADS_OFFLINE_CONVERSION,
+            'is_campaign_manager_conversion': self.ml_model.output.destination == Destination.CAMPAIGN_MANAGER_CONVERSION
           },
           'parameters': self.ml_model.output.parameters
         }

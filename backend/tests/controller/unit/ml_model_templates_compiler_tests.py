@@ -1858,6 +1858,63 @@ class TestCompiler(parameterized.TestCase):
         sql,
         'Check for correct consolidated output block failed.')
 
+  def test_build_output_sql_campaign_mananger_conversion(self):
+    test_model = self.model_config(
+        model_type='BOOSTED_TREE_CLASSIFIER',
+        unique_id='USER_ID',
+        variables=[
+          {
+            'role': 'LABEL',
+            'name': 'purchase',
+            'source': 'GOOGLE_ANALYTICS',
+            'key': 'value',
+            'value_type': 'string,int'
+          },
+          {
+            'role': 'FEATURE',
+            'name': 'click',
+            'source': 'GOOGLE_ANALYTICS'
+          },
+          {
+            'role': 'FEATURE',
+            'name': 'subscribe',
+            'source': 'FIRST_PARTY'
+          }
+        ],
+        class_imbalance=4,
+        source='GOOGLE_ANALYTICS_AND_FIRST_PARTY',
+        destination='CAMPAIGN_MANAGER_CONVERSION')
+
+    pipeline = self.compiler(test_model).build_predictive_pipeline()
+    self.assertEqual(pipeline['name'], 'Test Model - Predictive')
+
+    output_job = self.first(
+        pipeline['jobs'], 'name', 'Test Model - Predictive Output')
+    self.assertIsNotNone(output_job)
+    params = output_job['params']
+
+    sql_param = self.first(params, 'name', 'script')
+    self.assertIsNotNone(sql_param)
+    sql = sql_param['value']
+
+    # check gclid pulled from google analytics
+    self.assertRegex(
+        sql,
+        r'[\s\S]+'.join([
+            re.escape('params.value.string_value AS gclid,'),
+            re.escape('timestamp AS timestamp_micros,')
+        ]),
+        'Check to ensure gclid and timestamp were pulled from google analytics failed.')
+
+    # consolidated output block check
+    self.assertRegex(
+        sql,
+        r'[\s\S]+'.join([
+            re.escape('g.gclid,'),
+            re.escape('g.timestamp_micros')
+        ]),
+        'Check for correct consolidated output block failed.')
+
   def test_build_output_sql_google_ads_offline_conversion_first_party_only(self):
     test_model = self.model_config(
         model_type='BOOSTED_TREE_CLASSIFIER',
@@ -1916,10 +1973,11 @@ class TestCompiler(parameterized.TestCase):
         r'[\s\n]+'.join([
             re.escape('unique_id,'),
             re.escape('gclid,'),
-            re.escape('FORMAT_TIMESTAMP("%F %T%Ez", TIMESTAMP(timestamp)) AS datetime'),
+            re.escape('FORMAT_TIMESTAMP("%F %T%Ez", TIMESTAMP(timestamp)) AS datetime,'),
+            re.escape('UNIX_MICROS(TIMESTAMP(timestamp)) AS timestamp_micros'),
             re.escape('FROM first_party')
         ]),
-        'Check to ensure gclid, unique_id, and datetime pull from first party table failed.')
+        'Check to ensure gclid, unique_id, datetime, and timestamp pull from first party table failed.')
 
     # consolidated output block check
     self.assertIn(
@@ -2099,6 +2157,42 @@ class TestCompiler(parameterized.TestCase):
         template_param['value'],
         'Failed template check.')
 
+  def test_build_campaign_manager_conversion(self):
+    test_model = self.model_config(
+        model_type='BOOSTED_TREE_REGRESSOR',
+        unique_id='USER_ID',
+        variables=[
+          {
+            'role': 'LABEL',
+            'name': 'purchase',
+            'source': 'GOOGLE_ANALYTICS',
+            'key': 'value',
+            'value_type': 'float'
+          }
+        ],
+        class_imbalance=0,
+        destination='CAMPAIGN_MANAGER_CONVERSION')
+
+    pipeline = self.compiler(test_model).build_predictive_pipeline()
+    self.assertEqual(pipeline['name'], 'Test Model - Predictive')
+
+    upload_job = self.first(
+        pipeline['jobs'], 'name', 'Test Model - Predictive Upload')
+    self.assertIsNotNone(upload_job)
+    params = upload_job['params']
+
+    # template check
+    template_param = self.first(params, 'name', 'template')
+    self.assertIsNotNone(template_param)
+
+    self.assertRegex(
+        template_param['value'],
+        r'[\s\n]+'.join([
+            re.escape('"floodlightActivityId": "7890",'),
+            re.escape('"floodlightConfigurationId": "3456",')
+        ]),
+        'Failed template check.')
+
   def model_config(self,
                    model_type: str,
                    variables: list[dict[str, Any]],
@@ -2145,6 +2239,9 @@ class TestCompiler(parameterized.TestCase):
             'parameters': {
                 'customer_id': 1234,
                 'conversion_action_id': 5678,
+                'profile_id': 9012,
+                'floodlight_configuration_id': 3456,
+                'floodlight_activity_id': 7890,
                 'average_conversion_value': 1234.5
             }
         }

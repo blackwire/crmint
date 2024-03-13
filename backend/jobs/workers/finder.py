@@ -22,6 +22,7 @@ from jobs.workers.bigquery import bq_ml_trainer
 from jobs.workers.bigquery import bq_query_launcher
 from jobs.workers.bigquery import bq_script_executor
 from jobs.workers.bigquery import bq_to_ads_offline_click_conversion
+from jobs.workers.bigquery import bq_to_campaign_manager_conversion
 from jobs.workers.bigquery import bq_to_measurement_protocol_ga4
 from jobs.workers.bigquery import bq_to_storage_exporter
 from jobs.workers.bigquery import bq_to_vertexai_dataset
@@ -52,12 +53,12 @@ WORKERS_MAPPING = {
     'BQScriptExecutor':
         bq_script_executor.BQScriptExecutor,
     # 'BQToAppConversionAPI',
-    # 'BQToCM',
-    # 'BQToMeasurementProtocol',
     'BQToMeasurementProtocolGA4':
         bq_to_measurement_protocol_ga4.BQToMeasurementProtocolGA4,
     'BQToAdsOfflineClickConversion':
         bq_to_ads_offline_click_conversion.BQToAdsOfflineClickConversion,
+    'BQToCampaignManagerConversion':
+        bq_to_campaign_manager_conversion.BQToCampaignManagerConversion,
     'BQToStorageExporter':
         bq_to_storage_exporter.BQToStorageExporter,
     'BQToVertexAIDataset':

@@ -91,6 +91,9 @@ export class MlModelFormComponent implements OnInit {
         parameters: this._fb.group({
           customerId: [null, Validators.pattern(/^[0-9]*$/)],
           conversionActionId: [null, Validators.pattern(/^[0-9]*$/)],
+          profileId: [null, Validators.pattern(/^[0-9]*$/)],
+          floodlightConfigurationId: [null, Validators.pattern(/^[0-9]*$/)],
+          floodlightActivityId: [null, Validators.pattern(/^[0-9]*$/)],
           averageConversionValue: [null, Validators.pattern(/^[0-9]*\.{0,1}[0-9]*$/)]
         })
       })
@@ -249,6 +252,10 @@ export class MlModelFormComponent implements OnInit {
     switch (output.destination) {
       case Destination.GOOGLE_ADS_OFFLINE_CONVERSION:
         output.requirements = ['customerId', 'conversionActionId'];
+        break;
+
+      case Destination.CAMPAIGN_MANAGER_CONVERSION:
+        output.requirements = ['profileId', 'floodlightConfigurationId', 'floodlightActivityId'];
         break;
     }
     if (isClassificationModel) {
@@ -593,6 +600,9 @@ export class MlModelFormComponent implements OnInit {
       parameters: {
         customer_id: formModel.output.parameters.customerId as string,
         conversion_action_id: formModel.output.parameters.conversionActionId as string,
+        profile_id: formModel.output.parameters.profileId as string,
+        floodlight_configuration_id: formModel.output.parameters.floodlightConfigurationId as string,
+        floodlight_activity_id: formModel.output.parameters.floodlightActivityId as string,
         average_conversion_value: parseFloat(formModel.output.parameters.averageConversionValue)
       }
     } as Output;

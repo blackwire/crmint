@@ -100,7 +100,7 @@ CREATE OR REPLACE TABLE `{{project}}.{{dataset}}.output` AS (
   FROM prepared_predictions p
   INNER JOIN users_without_score wos
   ON p.unique_id = wos.unique_id
-  {% elif output.destination.is_google_ads_offline_conversion %}
+  {% elif output.destination.is_google_ads_offline_conversion or output.destination.is_campaign_manager_conversion %}
   gclids AS (
     {% if google_analytics.in_source %}
     SELECT * EXCEPT(row_num)
@@ -109,6 +109,7 @@ CREATE OR REPLACE TABLE `{{project}}.{{dataset}}.output` AS (
         unique_id,
         params.value.string_value AS gclid,
         FORMAT_TIMESTAMP("%F %T%Ez", TIMESTAMP(TIMESTAMP_MICROS(timestamp))) AS datetime,
+        timestamp AS timestamp_micros,
         ROW_NUMBER() OVER (PARTITION BY unique_id ORDER BY timestamp DESC) AS row_num
       FROM events, UNNEST(params) AS params
       WHERE name = "page_view"
@@ -120,14 +121,16 @@ CREATE OR REPLACE TABLE `{{project}}.{{dataset}}.output` AS (
     SELECT
       unique_id,
       gclid,
-      FORMAT_TIMESTAMP("%F %T%Ez", TIMESTAMP(timestamp)) AS datetime
+      FORMAT_TIMESTAMP("%F %T%Ez", TIMESTAMP(timestamp)) AS datetime,
+      UNIX_MICROS(TIMESTAMP(timestamp)) AS timestamp_micros
     FROM first_party
     {% endif %}
   )
   SELECT
     p.*,
     g.gclid,
-    g.datetime
+    g.datetime,
+    g.timestamp_micros
   FROM prepared_predictions p
   INNER JOIN gclids g
   ON p.unique_id = g.unique_id

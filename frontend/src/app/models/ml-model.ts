@@ -47,7 +47,8 @@ export enum Source {
 
 export enum Destination {
   GOOGLE_ANALYTICS_MP_EVENT = 'GOOGLE_ANALYTICS_MP_EVENT',
-  GOOGLE_ADS_OFFLINE_CONVERSION = 'GOOGLE_ADS_OFFLINE_CONVERSION'
+  GOOGLE_ADS_OFFLINE_CONVERSION = 'GOOGLE_ADS_OFFLINE_CONVERSION',
+  CAMPAIGN_MANAGER_CONVERSION = 'CAMPAIGN_MANAGER_CONVERSION'
 }
 
 export type Range = {
@@ -164,6 +165,9 @@ export type Input = {
 type OutputParameters = {
   customer_id: string;
   conversion_action_id: string;
+  profile_id: string;
+  floodlight_configuration_id: string;
+  floodlight_activity_id: string;
   average_conversion_value: number;
 }
 

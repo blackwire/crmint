@@ -1,0 +1,9 @@
+{
+    "kind": "dfareporting#conversion",
+    "gclid": "${gclid}",
+    "floodlightActivityId": "{{output.parameters.floodlight_activity_id}}",
+    "floodlightConfigurationId": "{{output.parameters.floodlight_configuration_id}}",
+    "ordinal": ${timestamp_micros},
+    "timestampMicros": ${timestamp_micros},
+    "value": ${value}
+}

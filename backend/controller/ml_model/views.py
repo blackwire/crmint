@@ -95,6 +95,9 @@ output_structure = fields.Nested({
     'parameters': fields.Nested({
         'customer_id': fields.String,
         'conversion_action_id': fields.String,
+        'profile_id': fields.String,
+        'floodlight_configuration_id': fields.String,
+        'floodlight_activity_id': fields.String,
         'average_conversion_value': fields.Float
     })
 })

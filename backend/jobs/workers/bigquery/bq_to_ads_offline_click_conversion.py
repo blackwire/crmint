@@ -14,7 +14,6 @@
 
 """Workers to upload offline conversions to Google Ads."""
 import json
-import math
 import string
 
 from typing import Any, List
@@ -26,7 +25,7 @@ from jobs.workers.bigquery import bq_batch_worker, bq_worker
 
 
 CONVERSION_UPLOAD_JSON_TEMPLATE = 'template'
-CONVERSIONS_CUSTOMER_ID = 'customer_id'
+CONVERSION_UPLOAD_CUSTOMER_ID = 'customer_id'
 DEVELOPER_TOKEN = 'google_ads_developer_token'
 SERVICE_ACCOUNT_FILE = 'google_ads_service_account_file'
 REFRESH_TOKEN = 'google_ads_refresh_token'
@@ -68,7 +67,7 @@ class BQToAdsOfflineClickConversion(bq_batch_worker.BQBatchDataWorker):
      True,
      '',
      'JSON template of a conversion upload request.'),
-    (CONVERSIONS_CUSTOMER_ID,
+    (CONVERSION_UPLOAD_CUSTOMER_ID,
      'string',
      True,
      '',
@@ -126,8 +125,8 @@ class BQToAdsOfflineClickConversion(bq_batch_worker.BQBatchDataWorker):
     if not self._params.get(CONVERSION_UPLOAD_JSON_TEMPLATE, None):
       err_messages.append(f'"{CONVERSION_UPLOAD_JSON_TEMPLATE}" is required.')
 
-    if not self._params.get(CONVERSIONS_CUSTOMER_ID, None):
-      err_messages.append(f'"{CONVERSIONS_CUSTOMER_ID}" is required.')
+    if not self._params.get(CONVERSION_UPLOAD_CUSTOMER_ID, None):
+      err_messages.append(f'"{CONVERSION_UPLOAD_CUSTOMER_ID}" is required.')
 
     if not self._params.get(DEVELOPER_TOKEN, None):
       err_messages.append(f'"{DEVELOPER_TOKEN}" is required.')
@@ -156,7 +155,7 @@ class AdsOfflineClickPageResultsWorker(bq_batch_worker.TablePageResultsProcessor
   def _process_page_results(self, page_data: page_iterator.Page) -> None:
     ads_client = self._get_ads_client()
     num_rows = page_data.num_items
-    template = string.Template(self._params['template'])
+    template = string.Template(self._params[CONVERSION_UPLOAD_JSON_TEMPLATE])
 
     conversion_objs = []
     for idx, row in enumerate(page_data):
@@ -208,7 +207,7 @@ class AdsOfflineClickPageResultsWorker(bq_batch_worker.TablePageResultsProcessor
     conversion_upload_service = ads_client.get_service('ConversionUploadService')
 
     request = ads_client.get_type('UploadClickConversionsRequest')
-    request.customer_id = self._params[CONVERSIONS_CUSTOMER_ID]
+    request.customer_id = self._params[CONVERSION_UPLOAD_CUSTOMER_ID]
     request.conversions.extend(payload)
     request.partial_failure = True
 

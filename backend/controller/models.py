@@ -659,6 +659,9 @@ class MlModelOutputParameters(extensions.db.Model):
       Integer, ForeignKey('ml_model_output.ml_model_id'), primary_key=True)
   customer_id = Column(String(255), nullable=True)
   conversion_action_id = Column(String(255), nullable=True)
+  profile_id = Column(String(255), nullable=True)
+  floodlight_configuration_id = Column(String(255), nullable=True)
+  floodlight_activity_id = Column(String(255), nullable=True)
   average_conversion_value = Column(Float, nullable=True, default=1.0)
 
   ml_model_output = orm.relationship(
